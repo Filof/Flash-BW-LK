@@ -1,0 +1,20 @@
+{
+  "name": "FlashGameApp",
+  "displayName": "Flash Game",
+  "expo": {
+    "name": "Flash Game",
+    "slug": "flash-game-app",
+    "version": "1.0.0",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTabletMode": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-foreground.png",
+        "backgroundColor": "#1a1a1a"
+      },
+      "package": "com.flashgame.app"
+    }
+  }
+}

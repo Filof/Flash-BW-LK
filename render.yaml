@@ -1,0 +1,41 @@
+# Configuración de Render.com para FlashBrowser
+
+services:
+  - type: web
+    name: flashbrowser-game
+    env: docker
+    region: oregon
+    plan: standard
+    
+    # Configuración del servidor
+    startCommand: bash start.sh
+    
+    # Puertos expuestos
+    envVars:
+      - key: PORT
+        value: "5901"
+      - key: DISPLAY
+        value: ":99"
+    
+    # Archivo de construcción (si usas Dockerfile)
+    dockerfile: true
+    
+    # Limites de recursos
+    numInstances: 1
+    cpuCount: 2
+    memoryMB: 2048
+
+# Alternativa: configuración en render.yaml para Deploy
+name: FlashBrowser Game Server
+services:
+  - type: web
+    name: flashbrowser
+    env: debian
+    plan: free
+    buildCommand: chmod +x start.sh
+    startCommand: ./start.sh
+    envVars:
+      - key: DISPLAY
+        value: ":99"
+      - key: LIBGL_ALWAYS_INDIRECT
+        value: "1"

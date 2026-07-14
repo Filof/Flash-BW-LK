@@ -1,0 +1,69 @@
+{
+  "name": "FlashBrowser",
+  "productName": "Flash Browser",
+  "description": "Browser For Flash Player Games",
+  "homepage": "https://www.flash.pm",
+  "author": "AS3",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "publish": "electron-builder --win -p always",
+    "build": "electron-builder --win",
+    "build1": "electron-packager . FlashBrowser --platform=darwin --overwrite --icon=icon.icns",
+    "build2": "electron-packager . FlashBrowser --platform=win32 --overwrite --icon=icon.ico",
+    "build3": "electron-packager . FlashBrowser --all --overwrite --icon=icon.ico"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^9.0.5",
+	"electron-packager": "^15.4.0",
+    "electron-builder": "^22.9.1"
+  },
+  "dependencies": {
+    "@cliqz/adblocker-electron": "^1.23.0",
+    "cross-fetch": "^3.1.4",
+    "electron-context-menu": "^3.1.1",
+    "electron-navigation": "^6.6.6",  
+    "electron-updater": "^4.3.5",
+    "resolve-dependencies": "^6.0.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/radubirsan/FlashBrowser.git"
+  },
+  "build": {
+    "appId": "pm.flash.browser",
+    "directories": {
+      "buildResources": "resources",
+      "flashver": "flashver",
+      "output": "release"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "comunity",
+        "repo": "FlashBrowser"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "uninstallDisplayName": "Flash Browser",
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "FlashBrowser.${ext}"
+    }
+  }
+}
