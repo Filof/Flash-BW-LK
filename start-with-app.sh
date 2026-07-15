@@ -62,8 +62,17 @@ fi
 # Crear pantalla virtual Xvfb
 echo "[2/6] Creando pantalla virtual X11..."
 export DISPLAY=:99
-Xvfb :99 -screen 0 1280x720x24 -ac &
-XVFB_PID=$!
+if [ -e /tmp/.X99-lock ] && ! pgrep -f "Xvfb :99" >/dev/null 2>&1; then
+  echo "Limpiando lock stale de Xvfb en display 99..."
+  rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
+fi
+if pgrep -f "Xvfb :99" >/dev/null 2>&1; then
+  echo "Xvfb :99 ya está en ejecución. Usando el servidor existente."
+  XVFB_PID=$(pgrep -f "Xvfb :99" | head -n 1)
+else
+  Xvfb :99 -screen 0 1280x720x24 -ac &
+  XVFB_PID=$!
+fi
 sleep 3
 
 # Iniciar VNC Server para acceso VNC nativo
@@ -92,6 +101,70 @@ echo "[5/6] Preparando FlashBrowser..."
 cd "$(dirname "$0")"
 chmod +x FlashBrowser-linux-x64/FlashBrowser
 
+# Verificar si el archivo es un puntero Git LFS en lugar de un binario real
+if head -n 1 FlashBrowser-linux-x64/FlashBrowser | grep -q '^version https://git-lfs.github.com/spec/v1'; then
+  echo "WARN: FlashBrowser es un puntero Git LFS, no el binario real."
+  echo "Intentando obtener el binario desde Google Drive si está configurado..."
+
+  # Función para extraer el ID desde una URL pública de Drive
+  extract_file_id() {
+    url="$1"
+    # patrones comunes
+    echo "$url" | sed -n 's#.*?/d/\([^/\?]*\).*#\1#p; s#.*[?&]id=\([^&]*\).*#\1#p'
+  }
+
+  # Descargar desde Google Drive manejando confirm tokens para archivos grandes
+  download_from_gdrive() {
+    file_id="$1"
+    dest="$2"
+    echo "Descargando desde Drive: $file_id -> $dest"
+    cookie=/tmp/gdrive_cookie_$$.txt
+    tmp_html=/tmp/gdrive_confirm_$$.html
+
+    # Obtener la primera respuesta que puede contener el token de confirmación
+    curl -s -c "$cookie" -L "https://drive.google.com/uc?export=download&id=${file_id}" -o "$tmp_html"
+    # Buscar token
+    confirm=$(grep -oP "confirm=\K[0-9A-Za-z_-]+" "$tmp_html" | head -n1 || true)
+    if [ -n "$confirm" ]; then
+      curl -s -Lb "$cookie" -L "https://drive.google.com/uc?export=download&confirm=${confirm}&id=${file_id}" -o "$dest"
+    else
+      # Intento directo
+      curl -s -Lb "$cookie" -L "https://drive.google.com/uc?export=download&id=${file_id}" -o "$dest"
+    fi
+    rm -f "$cookie" "$tmp_html" 2>/dev/null || true
+  }
+
+  # Si se proporcionó GDRIVE_URL o GDRIVE_FILE_ID, intentar descarga
+  if [ -n "$GDRIVE_FILE_ID" ] || [ -n "$GDRIVE_URL" ]; then
+    if [ -z "$GDRIVE_FILE_ID" ] && [ -n "$GDRIVE_URL" ]; then
+      GDRIVE_FILE_ID=$(extract_file_id "$GDRIVE_URL")
+    fi
+    if [ -n "$GDRIVE_FILE_ID" ]; then
+      mkdir -p FlashBrowser-linux-x64
+      download_from_gdrive "$GDRIVE_FILE_ID" "FlashBrowser-linux-x64/Flashbrowser.tmp" || true
+      # Si la descarga tuvo éxito, reemplazar el archivo puntero
+      if [ -s "FlashBrowser-linux-x64/Flashbrowser.tmp" ]; then
+        mv "FlashBrowser-linux-x64/Flashbrowser.tmp" "FlashBrowser-linux-x64/Flashbrowser"
+        mv "FlashBrowser-linux-x64/Flashbrowser" "FlashBrowser-linux-x64/FlashBrowser" || true
+        chmod +x "FlashBrowser-linux-x64/FlashBrowser" || true
+      else
+        echo "ERROR: la descarga desde Drive falló o el archivo está vacío."
+      fi
+    else
+      echo "ERROR: no se pudo determinar GDRIVE_FILE_ID desde GDRIVE_URL."
+    fi
+  else
+    echo "No se configuró GDRIVE_FILE_ID ni GDRIVE_URL para descargar el binario desde Drive."
+  fi
+
+  # Verificar de nuevo
+  if [ ! -f "./FlashBrowser-linux-x64/FlashBrowser" ] || head -n 1 FlashBrowser-linux-x64/FlashBrowser | grep -q '^version https://git-lfs.github.com/spec/v1'; then
+    echo "ERROR: FlashBrowser sigue sin estar disponible como binario real."
+    echo "Asegúrate de establecer la variable de entorno GDRIVE_FILE_ID o GDRIVE_URL en Railway con el ID/URL del archivo 'FlashBrowser' en Drive."
+    exit 1
+  fi
+fi
+
 # Configurar variables de entorno para Chromium sin GPU
 export LIBGL_ALWAYS_INDIRECT=1
 export QT_QPA_PLATFORM=offscreen
@@ -108,7 +181,22 @@ echo "URL del juego: https://www.mnfclub.com/game-windows.html"
 echo "=========================================="
 
 # Ejecutar el navegador con flags necesarios
-./FlashBrowser-linux-x64/FlashBrowser --no-sandbox --disable-gpu --disable-web-resources
+./FlashBrowser-linux-x64/FlashBrowser \
+  --no-sandbox \
+  --disable-gpu \
+  --disable-web-resources \
+  --disable-dev-shm-usage \
+  --process-per-site \
+  --renderer-process-limit=1 \
+  --disable-background-networking \
+  --disable-background-timer-throttling \
+  --disable-client-side-phishing-detection \
+  --disable-default-apps \
+  --disable-extensions \
+  --disable-sync \
+  --disable-translate \
+  --no-first-run \
+  --no-default-browser-check
 
 # Mantener los servicios activos
 wait $XVFB_PID $VNC_PID $NOVNC_PID 2>/dev/null || wait

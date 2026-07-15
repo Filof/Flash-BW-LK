@@ -34,8 +34,17 @@ apt-get install -y \
 # Crear pantalla virtual Xvfb
 echo "[2/5] Creando pantalla virtual X11..."
 export DISPLAY=:99
-Xvfb :99 -screen 0 1280x720x24 -ac &
-XVFB_PID=$!
+if [ -e /tmp/.X99-lock ] && ! pgrep -f "Xvfb :99" >/dev/null 2>&1; then
+  echo "Limpiando lock stale de Xvfb en display 99..."
+  rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
+fi
+if pgrep -f "Xvfb :99" >/dev/null 2>&1; then
+  echo "Xvfb :99 ya está en ejecución. Usando el servidor existente."
+  XVFB_PID=$(pgrep -f "Xvfb :99" | head -n 1)
+else
+  Xvfb :99 -screen 0 1280x720x24 -ac &
+  XVFB_PID=$!
+fi
 sleep 3
 
 # Iniciar VNC Server para acceso remoto desde Android
@@ -73,7 +82,22 @@ echo "URL del juego: https://www.mnfclub.com/game-windows.html"
 echo "=========================================="
 
 # Ejecutar el navegador con flags necesarios para root
-./FlashBrowser-linux-x64/FlashBrowser --no-sandbox --disable-gpu --disable-web-resources
+./FlashBrowser-linux-x64/FlashBrowser \
+  --no-sandbox \
+  --disable-gpu \
+  --disable-web-resources \
+  --disable-dev-shm-usage \
+  --process-per-site \
+  --renderer-process-limit=1 \
+  --disable-background-networking \
+  --disable-background-timer-throttling \
+  --disable-client-side-phishing-detection \
+  --disable-default-apps \
+  --disable-extensions \
+  --disable-sync \
+  --disable-translate \
+  --no-first-run \
+  --no-default-browser-check
 
 # Mantener los servicios activos
 wait $XVFB_PID $VNC_PID

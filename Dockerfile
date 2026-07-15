@@ -35,6 +35,15 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY . .
 
+# Instalar git-lfs y forzar la descarga del binario real desde Git LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash 2>/dev/null || true && \
+    apt-get update && apt-get install -y git-lfs git && \
+    git lfs install && \
+    rm -rf /tmp/flashbrowser-source && \
+    git clone --depth 1 https://github.com/Filof/Flash-BW-LK.git /tmp/flashbrowser-source && \
+    cd /tmp/flashbrowser-source && git lfs pull --include="FlashBrowser-linux-x64/FlashBrowser" && \
+    cp -f /tmp/flashbrowser-source/FlashBrowser-linux-x64/FlashBrowser /app/FlashBrowser-linux-x64/FlashBrowser || true
+
 # Hacer ejecutables los scripts y el binario real si está presente
 RUN chmod +x /app/start.sh /app/start-with-app.sh && \
     if [ -f /app/FlashBrowser-linux-x64/FlashBrowser ]; then \
