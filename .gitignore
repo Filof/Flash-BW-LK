@@ -40,14 +40,22 @@ logs/
 FlashBrowser-linux-x64/locales/
 FlashBrowser-linux-x64/swiftshader/
 
-# Ignore runtime binaries and large build artifacts except the real browser binary and required libs
-FlashBrowser-linux-x64/*.pak
+# Allow required runtime files for FlashBrowser
 !FlashBrowser-linux-x64/FlashBrowser
+!FlashBrowser-linux-x64/libEGL.so
 !FlashBrowser-linux-x64/libffmpeg.so
 !FlashBrowser-linux-x64/libGLESv2.so
 !FlashBrowser-linux-x64/libvk_swiftshader.so
 !FlashBrowser-linux-x64/libvulkan.so
+!FlashBrowser-linux-x64/icudtl.dat
+!FlashBrowser-linux-x64/resources.pak
+!FlashBrowser-linux-x64/snapshot_blob.bin
+!FlashBrowser-linux-x64/v8_context_snapshot.bin
+!FlashBrowser-linux-x64/vk_swiftshader_icd.json
+!FlashBrowser-linux-x64/chrome_100_percent.pak
+!FlashBrowser-linux-x64/chrome_200_percent.pak
+
+# Ignore other runtime binaries and large build artifacts
 FlashBrowser-linux-x64/*.dll
 FlashBrowser-linux-x64/*.bin
-FlashBrowser-linux-x64/*.dat
 FlashBrowser-linux-x64/*.exe
