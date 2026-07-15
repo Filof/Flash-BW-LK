@@ -36,7 +36,7 @@ WORKDIR /app
 COPY . .
 
 # Hacer ejecutables los scripts
-RUN chmod +x /app/FlashBrowser && \
+RUN chmod +x /app/FlashBrowser-linux-x64/FlashBrowser && \
     chmod +x /app/start.sh
 
 # Crear directorio para VNC
