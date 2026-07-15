@@ -33,6 +33,23 @@ apt-get install -y \
   websockify \
   2>/dev/null || true
 
+# Si el binario FlashBrowser no está presente, intentar obtenerlo vía Git LFS
+if [ ! -f "./FlashBrowser" ]; then
+  echo "[1.5/6] FlashBrowser no encontrado: intentando git lfs pull..."
+  apt-get update -qq 2>/dev/null || true
+  apt-get install -y git curl gnupg ca-certificates 2>/dev/null || true
+  # Instalar git-lfs si hace falta
+  if ! command -v git-lfs >/dev/null 2>&1; then
+    echo "Instalando git-lfs..."
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash 2>/dev/null || true
+    apt-get update -qq 2>/dev/null || true
+    apt-get install -y git-lfs 2>/dev/null || true
+    git lfs install || true
+  fi
+  # Intentar pull (puede fallar si no hay .git en el contexto)
+  git lfs pull --include="FlashBrowser-linux-x64/FlashBrowser" || true
+fi
+
 # Crear pantalla virtual Xvfb
 echo "[2/6] Creando pantalla virtual X11..."
 export DISPLAY=:99

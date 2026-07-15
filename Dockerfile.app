@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y \
     tightvncserver \
     websockify \
     novnc \
+    git \
+    curl \
+    gnupg \
     curl \
     wget \
     ca-certificates \

@@ -41,7 +41,6 @@ FlashBrowser-linux-x64/locales/
 FlashBrowser-linux-x64/swiftshader/
 
 # Ignore runtime binaries and large build artifacts
-FlashBrowser-linux-x64/FlashBrowser
 FlashBrowser-linux-x64/*.pak
 FlashBrowser-linux-x64/*.so
 FlashBrowser-linux-x64/*.dll
