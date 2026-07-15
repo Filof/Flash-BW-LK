@@ -5,6 +5,8 @@
 
 set -e
 
+cd "$(dirname "$0")"
+
 echo "=========================================="
 echo "FlashBrowser - Inicializando en Linux"
 echo "Con soporte para app Android (noVNC)"
@@ -34,7 +36,7 @@ apt-get install -y \
   2>/dev/null || true
 
 # Si el binario FlashBrowser no está presente, intentar obtenerlo vía Git LFS
-if [ ! -f "./FlashBrowser" ]; then
+if [ ! -f "./FlashBrowser-linux-x64/FlashBrowser" ]; then
   echo "[1.5/6] FlashBrowser no encontrado: intentando git lfs pull..."
   apt-get update -qq 2>/dev/null || true
   apt-get install -y git curl gnupg ca-certificates 2>/dev/null || true
@@ -48,6 +50,13 @@ if [ ! -f "./FlashBrowser" ]; then
   fi
   # Intentar pull (puede fallar si no hay .git en el contexto)
   git lfs pull --include="FlashBrowser-linux-x64/FlashBrowser" || true
+fi
+
+# Verificar que el binario exista después del intento de descarga
+if [ ! -f "./FlashBrowser-linux-x64/FlashBrowser" ]; then
+  echo "ERROR: FlashBrowser no encontrado en ./FlashBrowser-linux-x64/FlashBrowser"
+  echo "Asegúrate de que el binario esté presente o que Git LFS esté disponible en el contexto de build/run."
+  exit 1
 fi
 
 # Crear pantalla virtual Xvfb

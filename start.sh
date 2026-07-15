@@ -50,6 +50,10 @@ sleep 2
 # Preparar FlashBrowser
 echo "[4/5] Preparando FlashBrowser..."
 cd "$(dirname "$0")"
+if [ ! -f "./FlashBrowser-linux-x64/FlashBrowser" ]; then
+  echo "ERROR: FlashBrowser no encontrado en ./FlashBrowser-linux-x64/FlashBrowser"
+  exit 1
+fi
 chmod +x FlashBrowser-linux-x64/FlashBrowser
 
 # Configurar variables de entorno para Chromium sin GPU

@@ -35,9 +35,11 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY . .
 
-# Hacer ejecutables los scripts
-RUN chmod +x /app/FlashBrowser-linux-x64/FlashBrowser && \
-    chmod +x /app/start.sh
+# Hacer ejecutables los scripts y el binario real si está presente
+RUN chmod +x /app/start.sh /app/start-with-app.sh && \
+    if [ -f /app/FlashBrowser-linux-x64/FlashBrowser ]; then \
+      chmod +x /app/FlashBrowser-linux-x64/FlashBrowser; \
+    fi
 
 # Crear directorio para VNC
 RUN mkdir -p /root/.vnc
@@ -48,8 +50,8 @@ ENV DISPLAY=:99 \
     QT_QPA_PLATFORM=offscreen \
     PORT=5901
 
-# Exponer puerto VNC
-EXPOSE 5901
+# Exponer puertos
+EXPOSE 5901 6080
 
 # Ejecutar script de inicio
-CMD ["./start.sh"]
+CMD ["bash", "/app/start-with-app.sh"]

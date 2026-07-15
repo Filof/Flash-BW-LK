@@ -10,7 +10,6 @@ yarn-error.log
 .vscode
 .idea
 *.log
-FlashBrowser-linux-x64*
 dist
 build
 *.tar.gz
