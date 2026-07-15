@@ -81,7 +81,7 @@ fi
 # Preparar FlashBrowser
 echo "[5/6] Preparando FlashBrowser..."
 cd "$(dirname "$0")"
-chmod +x FlashBrowser
+chmod +x FlashBrowser-linux-x64/FlashBrowser
 
 # Configurar variables de entorno para Chromium sin GPU
 export LIBGL_ALWAYS_INDIRECT=1
@@ -99,7 +99,7 @@ echo "URL del juego: https://www.mnfclub.com/game-windows.html"
 echo "=========================================="
 
 # Ejecutar el navegador con flags necesarios
-./FlashBrowser --no-sandbox --disable-gpu --disable-web-resources
+./FlashBrowser-linux-x64/FlashBrowser --no-sandbox --disable-gpu --disable-web-resources
 
 # Mantener los servicios activos
 wait $XVFB_PID $VNC_PID $NOVNC_PID 2>/dev/null || wait

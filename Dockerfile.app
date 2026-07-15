@@ -40,8 +40,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY . .
 
-# Hacer ejecutables los scripts
-RUN chmod +x /app/FlashBrowser && \
+# Hacer ejecutables los scripts y el binario real
+RUN chmod +x /app/FlashBrowser-linux-x64/FlashBrowser && \
     chmod +x /app/start.sh && \
     chmod +x /app/start-with-app.sh
 
