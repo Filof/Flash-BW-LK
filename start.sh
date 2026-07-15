@@ -65,6 +65,23 @@ if [ ! -f "./FlashBrowser-linux-x64/FlashBrowser" ]; then
 fi
 chmod +x FlashBrowser-linux-x64/FlashBrowser
 
+# Configurar ruta de librerías para que cargue libffmpeg.so y otras dependencias
+LIBRARY_DIR="$(pwd)/FlashBrowser-linux-x64"
+export LD_LIBRARY_PATH="$LIBRARY_DIR:${LD_LIBRARY_PATH:-}"
+export PATH="$LIBRARY_DIR:$PATH"
+
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+ls -l "$LIBRARY_DIR/libffmpeg.so" || true
+
+# Asegurar que las bibliotecas compartidas estén disponibles en /usr/lib
+if [ -d "$LIBRARY_DIR" ]; then
+  for so in "$LIBRARY_DIR"/*.so; do
+    if [ -f "$so" ]; then
+      ln -sf "$so" "/usr/lib/$(basename "$so")"
+    fi
+  done
+fi
+
 # Configurar variables de entorno para Chromium sin GPU
 export LIBGL_ALWAYS_INDIRECT=1
 export QT_QPA_PLATFORM=offscreen

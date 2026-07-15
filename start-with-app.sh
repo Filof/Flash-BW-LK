@@ -101,6 +101,23 @@ echo "[5/6] Preparando FlashBrowser..."
 cd "$(dirname "$0")"
 chmod +x FlashBrowser-linux-x64/FlashBrowser
 
+# Configurar ruta de librerías para que cargue libffmpeg.so y otras dependencias
+LIBRARY_DIR="$(pwd)/FlashBrowser-linux-x64"
+export LD_LIBRARY_PATH="$LIBRARY_DIR:${LD_LIBRARY_PATH:-}"
+export PATH="$LIBRARY_DIR:$PATH"
+
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+ls -l "$LIBRARY_DIR/libffmpeg.so" || true
+
+# Asegurar que las bibliotecas compartidas estén disponibles en /usr/lib
+if [ -d "$LIBRARY_DIR" ]; then
+  for so in "$LIBRARY_DIR"/*.so; do
+    if [ -f "$so" ]; then
+      ln -sf "$so" "/usr/lib/$(basename "$so")"
+    fi
+  done
+fi
+
 # Verificar si el archivo es un puntero Git LFS en lugar de un binario real
 if head -n 1 FlashBrowser-linux-x64/FlashBrowser | grep -q '^version https://git-lfs.github.com/spec/v1'; then
   echo "WARN: FlashBrowser es un puntero Git LFS, no el binario real."
@@ -181,6 +198,7 @@ echo "URL del juego: https://www.mnfclub.com/game-windows.html"
 echo "=========================================="
 
 # Ejecutar el navegador con flags necesarios
+LD_LIBRARY_PATH="$LIBRARY_DIR:$LD_LIBRARY_PATH" \
 ./FlashBrowser-linux-x64/FlashBrowser \
   --no-sandbox \
   --disable-gpu \
